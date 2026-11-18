@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sales & Inventory</title>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F2F4F3;--sf:#fff;--ink:#17262D;--mute:#5E6E75;--line:#D9DFDD;--acc:#1D6B59;--accs:#DCEBE6;--warn:#9A5A05;--warns:#F7E7CC;--bad:#A93A2A;--bads:#F5DAD5;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10181C;--sf:#172228;--ink:#E7EEEC;--mute:#93A5AC;--line:#2A3A42;--acc:#4FB79B;--accs:#1B3A33;--warn:#E0A44A;--warns:#3A2D14;--bad:#E58572;--bads:#3E1F1A;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#10181C;--sf:#172228;--ink:#E7EEEC;--mute:#93A5AC;--line:#2A3A42;--acc:#4FB79B;--accs:#1B3A33;--warn:#E0A44A;--warns:#3A2D14;--bad:#E58572;--bads:#3E1F1A;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 15px/1.5 'Schibsted Grotesk',system-ui,-apple-system,'Segoe UI',sans-serif}
+.wrap{max-width:1120px;margin:0 auto;padding:24px 20px 48px}
+h1{font-size:1.75rem;font-weight:700;letter-spacing:-.02em;margin:0;line-height:1.2}
+h2{font-size:1rem;font-weight:700;margin:0}
+.sub{color:var(--mute);margin:4px 0 0}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);background:var(--sf);border:1px solid var(--line);border-radius:10px;margin:20px 0 16px}
+.kpi{padding:16px 18px;border-left:1px solid var(--line)}
+.kpi:first-child{border-left:0}
+.kpi span{color:var(--mute);font-size:.85rem}
+.kpi b{display:block;font-size:1.7rem;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1.25}
+.kpi small{color:var(--mute)}
+.grid{display:grid;grid-template-columns:2fr 1fr;gap:16px}
+.panel{background:var(--sf);border:1px solid var(--line);border-radius:10px;padding:16px 18px;min-width:0}
+.head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{border:0;background:transparent;color:var(--mute);padding:5px 12px;font:inherit;font-size:.85rem;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+svg{display:block;width:100%;height:auto}
+.rs{list-style:none;margin:0;padding:0}
+.rs li{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+.rs li:first-child{border-top:0}
+.rs small{display:block;color:var(--mute)}
+button,input,select{font:inherit;color:inherit}
+.btn{border:1px solid var(--line);background:var(--sf);border-radius:8px;padding:5px 11px;cursor:pointer;font-size:.85rem;white-space:nowrap}
+.btn:hover{border-color:var(--acc);color:var(--acc)}
+.btn.pri{background:var(--acc);border-color:var(--acc);color:var(--sf);font-weight:500}
+.btn.pri:hover{color:var(--sf);filter:brightness(1.08)}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+input,select{border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:7px 10px;min-width:0}
+.sale{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:16px 0}
+.sale select{flex:1 1 240px}
+.sale input[type=number]{width:90px}
+#msg{color:var(--acc);font-size:.9rem;min-height:1.3em}
+#msg.err{color:var(--bad)}
+.tools{display:flex;gap:10px;flex-wrap:wrap}
+.scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:720px;font-variant-numeric:tabular-nums}
+th{text-align:left;font-weight:500;color:var(--mute);font-size:.85rem;padding:8px 10px;border-bottom:1px solid var(--line)}
+td{padding:10px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+td small{display:block;color:var(--mute)}
+.r{text-align:right}
+.lvl{position:relative;height:8px;width:130px;background:var(--bg);border-radius:4px;margin-top:5px}
+.lvl i{position:absolute;left:0;top:0;bottom:0;border-radius:4px;transition:width .25s}
+.lvl u{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--ink);opacity:.55}
+.chip{display:inline-block;padding:2px 9px;border-radius:99px;font-size:.8rem;font-weight:500}
+.ok{background:var(--accs);color:var(--acc)}.low{background:var(--warns);color:var(--warn)}.out{background:var(--bads);color:var(--bad)}
+.ok-f{background:var(--acc)}.low-f{background:var(--warn)}.out-f{background:var(--bad)}
+.forms{display:grid;grid-template-columns:3fr 2fr;gap:16px;margin:0 0 16px}
+.fg{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.fg label{display:flex;flex-direction:column;gap:4px;font-size:.85rem;color:var(--mute)}
+.fg input,.fg select{width:100%;color:var(--ink)}
+.fg .full{grid-column:1/-1}
+.fmsg{min-height:1.3em;font-size:.9rem;color:var(--acc);margin:10px 0 0}
+.fmsg.err{color:var(--bad)}
+@media (max-width:860px){.forms{grid-template-columns:1fr}}
+.foot{margin-top:18px;color:var(--mute);font-size:.85rem}
+.foot button{background:none;border:0;padding:0;color:var(--mute);text-decoration:underline;cursor:pointer}
+@media (max-width:860px){.grid{grid-template-columns:1fr}}
+@media (max-width:760px){.kpis{grid-template-columns:repeat(2,1fr)}.kpi:nth-child(3){border-left:0}.kpi:nth-child(n+3){border-top:1px solid var(--line)}}
+@media (prefers-reduced-motion:reduce){.lvl i{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Sales & inventory</h1>
+  <p class="sub" id="today"></p>
+
+  <div class="kpis" id="kpis"></div>
+
+  <div class="grid">
+    <section class="panel">
+      <div class="head">
+        <div><h2>Daily revenue</h2><small class="sub" id="rtotal"></small></div>
+        <div class="seg" role="group" aria-label="Date range">
+          <button data-range="7" aria-pressed="false">7 days</button>
+          <button data-range="14" aria-pressed="true">14 days</button>
+          <button data-range="30" aria-pressed="false">30 days</button>
+        </div>
+      </div>
+      <div id="chart"></div>
+    </section>
+    <section class="panel">
+      <div class="head"><h2>Needs restocking</h2></div>
+      <ul class="rs" id="restock"></ul>
+    </section>
+  </div>
+
+  <form class="sale" id="sale" aria-label="Record a sale">
+    <select id="sp" aria-label="Product"></select>
+    <input id="sq" type="number" min="1" value="1" aria-label="Quantity">
+    <button class="btn pri" type="submit">Record sale</button>
+    <span id="msg" role="status" aria-live="polite"></span>
+  </form>
+
+  <div class="forms">
+    <section class="panel">
+      <div class="head"><h2>Add a product</h2></div>
+      <form id="addp" class="fg">
+        <label class="full">Product name<input id="pn" required maxlength="60"></label>
+        <label>SKU<input id="ps" required maxlength="16"></label>
+        <label>Category<input id="pc" list="cats" required maxlength="30"></label>
+        <label>Selling price<input id="pp" type="number" min="0" step="0.01" required></label>
+        <label>Cost price<input id="pk" type="number" min="0" step="0.01" required></label>
+        <label>Opening stock<input id="pst" type="number" min="0" step="1" value="0" required></label>
+        <label>Reorder level<input id="pr" type="number" min="1" step="1" value="10" required></label>
+        <div class="full"><button class="btn pri" type="submit">Add product</button></div>
+      </form>
+      <datalist id="cats"></datalist>
+      <p class="fmsg" id="m1" role="status" aria-live="polite"></p>
+    </section>
+    <section class="panel">
+      <div class="head"><h2>Receive stock</h2></div>
+      <form id="recv" class="fg">
+        <label class="full">Product<select id="rp"></select></label>
+        <label>Quantity received<input id="rq" type="number" min="1" step="1" value="10" required></label>
+        <label>Supplier (optional)<input id="rs" maxlength="40"></label>
+        <div class="full"><button class="btn pri" type="submit">Receive stock</button></div>
+      </form>
+      <p class="fmsg" id="m2" role="status" aria-live="polite"></p>
+      <h2 style="margin-top:12px;font-size:.9rem">Recent deliveries</h2>
+      <ul class="rs" id="deliv"></ul>
+    </section>
+  </div>
+
+  <section class="panel">
+    <div class="head">
+      <h2>Inventory</h2>
+      <div class="tools">
+        <input id="q" type="search" placeholder="Search name or SKU" aria-label="Search products">
+        <select id="cat" aria-label="Category"></select>
+      </div>
+    </div>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Product</th><th class="r">Price</th><th class="r">Sold (30 days)</th><th>Stock level</th><th>Status</th><th class="r">Restock</th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+    <p class="foot" style="margin-bottom:0">The tick on each stock bar marks the reorder level. Changes are saved in this browser. <button id="reset" type="button">Reset sample data</button></p>
+  </section>
+</div>
+
+<script>
+const CUR='$',KEY='sales-inventory-v1';
+const $=s=>document.querySelector(s);
+const pad=n=>String(n).padStart(2,'0');
+const iso=a=>{const d=new Date();d.setDate(d.getDate()-a);return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())};
+const money=(n,dec)=>CUR+n.toLocaleString('en-US',{minimumFractionDigits:dec?2:0,maximumFractionDigits:dec?2:0});
+const RAW=[['Arabica beans 1 kg','COF-001','Pantry',18.5,11,64,30],['Green tea box','TEA-002','Pantry',9.5,4.8,120,40],['Oat granola','GRA-003','Pantry',7.2,3.6,18,35],['Ceramic mug','MUG-004','Home',12,5,42,20],['Steel bottle','BOT-005','Home',24,11,9,20],['Soy candle','CAN-006','Home',16,6.5,55,25],['Canvas tote','TOT-007','Apparel',14,5.5,0,25],['Wool socks','SOC-008','Apparel',11,4.2,88,40],['Linen apron','APR-009','Apparel',28,12,23,15],['Notebook A5','NOT-010','Stationery',6.5,2.4,140,60],['Gel pens, 10 pack','PEN-011','Stationery',8,3,31,40],['Desk planner','PLA-012','Stationery',19,8,47,20]];
+
+function seed(){
+  let s=7;const r=()=>{s|=0;s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
+  const products=RAW.map((a,i)=>({id:i+1,name:a[0],sku:a[1],cat:a[2],price:a[3],cost:a[4],stock:a[5],reorder:a[6]}));
+  const sales=[];
+  for(let a=29;a>=0;a--){const n=5+Math.floor(r()*9)+(a%7<2?4:0);
+    for(let k=0;k<n;k++)sales.push({d:iso(a),id:1+Math.floor(Math.pow(r(),1.4)*12),q:1+Math.floor(r()*3)});}
+  return{products,sales,recv:[]};
+}
+let S=null;
+try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+if(!S||!S.products||!S.sales)S=seed();
+S.recv=S.recv||[];
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const byId=id=>S.products.find(p=>p.id===id);
+let range=14;
+
+const status=p=>p.stock===0?['out','Out of stock']:p.stock<=p.reorder?['low','Low']:['ok','In stock'];
+const last30=()=>{const set=new Set();for(let a=0;a<30;a++)set.add(iso(a));return S.sales.filter(x=>set.has(x.d))};
+
+function kpis(){
+  const w=last30(),t=iso(0);
+  const rev=w.reduce((s,x)=>s+x.q*byId(x.id).price,0);
+  const pro=w.reduce((s,x)=>{const p=byId(x.id);return s+x.q*(p.price-p.cost)},0);
+  const units=w.reduce((s,x)=>s+x.q,0);
+  const today=w.filter(x=>x.d===t).reduce((s,x)=>s+x.q*byId(x.id).price,0);
+  const val=S.products.reduce((s,p)=>s+p.stock*p.cost,0);
+  const on=S.products.reduce((s,p)=>s+p.stock,0);
+  const k=[['Revenue, 30 days',money(rev),'Today: '+money(today)],['Gross profit',money(pro),(rev?Math.round(pro/rev*100):0)+'% margin'],['Units sold',units.toLocaleString('en-US'),w.length+' sales recorded'],['Stock value',money(val),on.toLocaleString('en-US')+' units on hand (at cost)']];
+  $('#kpis').innerHTML=k.map(x=>`<div class="kpi"><span>${x[0]}</span><b>${x[1]}</b><small>${x[2]}</small></div>`).join('');
+}
+
+function chart(){
+  const days=[];
+  for(let a=range-1;a>=0;a--){const d=iso(a);days.push({d,v:S.sales.filter(x=>x.d===d).reduce((t,x)=>t+x.q*byId(x.id).price,0)})}
+  const total=days.reduce((t,x)=>t+x.v,0),max=Math.max(...days.map(x=>x.v),1);
+  const top=Math.ceil(max/200)*200||200,W=600,H=220,L=48,B=24,T=8,ph=H-B-T,slot=(W-L)/days.length,bw=slot*.68;
+  let g='';
+  [0,.5,1].forEach(f=>{const y=T+ph-ph*f;g+=`<line x1="${L}" x2="${W}" y1="${y}" y2="${y}" stroke="var(--line)"/><text x="${L-8}" y="${y+4}" text-anchor="end" font-size="11" fill="var(--mute)">${money(top*f)}</text>`});
+  const every=Math.ceil(days.length/7);
+  days.forEach((x,i)=>{
+    const h=ph*x.v/top,cx=L+slot*i+slot/2;
+    g+=`<rect x="${cx-bw/2}" y="${T+ph-h}" width="${bw}" height="${h}" rx="2" fill="var(--acc)"><title>${x.d}: ${money(x.v)}</title></rect>`;
+    if((days.length-1-i)%every===0)g+=`<text x="${cx}" y="${H-6}" text-anchor="middle" font-size="11" fill="var(--mute)">${x.d.slice(5)}</text>`;
+  });
+  $('#chart').innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Bar chart of daily revenue for the last ${range} days">${g}</svg>`;
+  $('#rtotal').textContent=money(total)+' over the last '+range+' days';
+  document.querySelectorAll('[data-range]').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.range===range)));
+}
+
+function restock(){
+  const l=S.products.filter(p=>p.stock<=p.reorder).sort((a,b)=>a.stock/a.reorder-b.stock/b.reorder);
+  $('#restock').innerHTML=l.length?l.map(p=>{const q=Math.max(p.reorder*2-p.stock,p.reorder);
+    return `<li><div><b>${E(p.name)}</b><small>${p.stock===0?'Out of stock':p.stock+' left'}, reorder at ${p.reorder}</small></div><button class="btn" data-add="${q}" data-id="${p.id}">Add ${q}</button></li>`}).join('')
+    :'<li><small>Every product is above its reorder level.</small></li>';
+}
+
+function table(){
+  const q=$('#q').value.trim().toLowerCase(),c=$('#cat').value;
+  const sold={};last30().forEach(x=>sold[x.id]=(sold[x.id]||0)+x.q);
+  const l=S.products.filter(p=>(!c||p.cat===c)&&(!q||(p.name+p.sku).toLowerCase().includes(q)));
+  $('#rows').innerHTML=l.length?l.map(p=>{
+    const st=status(p),cap=p.reorder*3,w=Math.min(p.stock/cap,1)*100;
+    return `<tr><td><b>${E(p.name)}</b><small>${E(p.sku)}, ${E(p.cat)}</small></td><td class="r">${money(p.price,1)}</td><td class="r">${sold[p.id]||0}</td>
+    <td><span>${p.stock} units</span><div class="lvl"><i class="${st[0]}-f" style="width:${w}%"></i><u style="left:${100/3}%"></u></div></td>
+    <td><span class="chip ${st[0]}">${st[1]}</span></td>
+    <td class="r"><button class="btn" data-add="10" data-id="${p.id}">+10</button> <button class="btn" data-add="50" data-id="${p.id}">+50</button></td></tr>`}).join('')
+    :'<tr><td colspan="6"><small>No products match. Clear the search or pick another category.</small></td></tr>';
+}
+
+const E=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function options(){
+  const h=S.products.map(p=>`<option value="${p.id}">${E(p.name)} (${p.stock} in stock)</option>`).join('');
+  ['#sp','#rp'].forEach(id=>{const s=$(id).value;$(id).innerHTML=h;if(s)$(id).value=s});
+  const cats=[...new Set(S.products.map(p=>p.cat))],cv=$('#cat').value;
+  $('#cat').innerHTML='<option value="">All categories</option>'+cats.map(c=>`<option>${E(c)}</option>`).join('');
+  $('#cat').value=cv;
+  $('#cats').innerHTML=cats.map(c=>`<option value="${E(c)}">`).join('');
+}
+function deliv(){
+  const l=S.recv.slice(-4).reverse();
+  $('#deliv').innerHTML=l.length?l.map(x=>{const p=byId(x.id);return `<li><div><b>+${x.q} ${E(p?p.name:'Removed product')}</b><small>${x.s?E(x.s)+', ':''}${x.d}</small></div></li>`}).join(''):'<li><small>No deliveries logged yet.</small></li>';
+}
+function render(){kpis();chart();restock();table();options();deliv()}
+
+(function init(){
+  $('#today').textContent='Showing the last 30 days. Today is '+new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'})+'.';
+  render();
+})();
+
+document.addEventListener('click',e=>{
+  const a=e.target.closest('[data-add]');
+  if(a){const p=byId(+a.dataset.id);p.stock+=+a.dataset.add;S.recv.push({d:iso(0),id:p.id,q:+a.dataset.add,s:''});save();render();return}
+  const r=e.target.closest('[data-range]');
+  if(r){range=+r.dataset.range;chart()}
+});
+$('#q').addEventListener('input',table);
+$('#cat').addEventListener('change',table);
+$('#sale').addEventListener('submit',e=>{
+  e.preventDefault();
+  const p=byId(+$('#sp').value),q=Math.floor(+$('#sq').value),m=$('#msg');
+  if(!p||!(q>0)){m.className='err';m.textContent='Enter a quantity of 1 or more.';return}
+  if(q>p.stock){m.className='err';m.textContent='Only '+p.stock+' of '+p.name+' in stock. Restock first or lower the quantity.';return}
+  p.stock-=q;S.sales.push({d:iso(0),id:p.id,q});save();
+  m.className='';m.textContent='Recorded: '+q+' × '+p.name+' ('+money(q*p.price,1)+').';
+  render();
+});
+$('#addp').addEventListener('submit',e=>{
+  e.preventDefault();
+  const m=$('#m1'),v=id=>$(id).value.trim(),fail=t=>{m.className='fmsg err';m.textContent=t};
+  const name=v('#pn'),sku=v('#ps').toUpperCase(),cat=v('#pc');
+  const price=+$('#pp').value,cost=+$('#pk').value,stock=Math.floor(+$('#pst').value),reorder=Math.floor(+$('#pr').value);
+  if(!name||!sku||!cat)return fail('Fill in the name, SKU and category.');
+  if(S.products.some(p=>p.sku===sku))return fail('SKU '+sku+' already exists. Use a different SKU.');
+  if(!(price>0)||!(cost>=0))return fail('Enter a selling price above 0 and a cost of 0 or more.');
+  if(!(stock>=0))return fail('Opening stock can’t be negative.');
+  if(!(reorder>=1))return fail('Reorder level must be at least 1.');
+  S.products.push({id:Math.max(0,...S.products.map(p=>p.id))+1,name,sku,cat,price,cost,stock,reorder});
+  save();e.target.reset();m.className='fmsg';m.textContent='Added '+name+'.';render();
+});
+$('#recv').addEventListener('submit',e=>{
+  e.preventDefault();
+  const p=byId(+$('#rp').value),q=Math.floor(+$('#rq').value),m=$('#m2');
+  if(!p||!(q>0)){m.className='fmsg err';m.textContent='Enter a quantity of 1 or more.';return}
+  p.stock+=q;S.recv.push({d:iso(0),id:p.id,q,s:$('#rs').value.trim()});save();
+  m.className='fmsg';m.textContent='Received '+q+' × '+p.name+'.';render();
+});
+$('#reset').addEventListener('click',()=>{S=seed();save();$('#msg').textContent='';render()});
+</script>
+</body>
+</html>
